@@ -3,23 +3,67 @@ const dotenv = require("dotenv");
 dotenv.config();
 const connectDB = require("./connection");
 const User = require("./models/user-model");
+const { default: mongoose, Error } = require("mongoose");
 const app = express();
 app.use(express.json());
 
-app.get("/", (req, res) => {
+// getting single user
+app.get("/user/:id", async (req, res) => {
   try {
-    res.send("user data !!");
+    const userid = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userid)) {
+      res.status(400).send("Invalid user id");
+    }
+
+    const userData = await User.findOne({ _id: userid });
+
+    if (!userData) {
+      res.status(400).send("User doest not exist");
+    } else {
+      res.status(200).send(userData);
+    }
   } catch (error) {
     console.log("error", error);
+    res.status(500).send("internal server error");
   }
 });
 
+// added user
 app.post("/user", async (req, res) => {
-  const data = req.body;
-  console.log(data);
-  const user = new User(data);
-  await user.save();
-  res.status(200).send("user added successfully !!");
+  try {
+    const userData = new User(req.body);
+    await userData.save();
+    res.status(200).send("User Added successfully");
+  } catch (error) {
+    if (error.name == "ValidationError") {
+      const mess = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({ errors: mess });
+    }
+    res.status(500).send("Internall server error");
+  }
+});
+
+//updated user
+app.patch("/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400).send("Invalid user id");
+    }
+    const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedUser) {
+      res.status(404).send("User not found");
+    }else{
+      res.status(200).send("User Updated ")
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).send("internal server error")
+  }
 });
 
 connectDB()
