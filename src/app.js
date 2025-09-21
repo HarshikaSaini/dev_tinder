@@ -4,6 +4,8 @@ dotenv.config();
 const connectDB = require("./connection");
 const User = require("./models/user-model");
 const { default: mongoose, Error } = require("mongoose");
+const { userValidator } = require("./utils/user");
+const bcrypt = require("bcrypt")
 const app = express();
 app.use(express.json());
 
@@ -31,7 +33,13 @@ app.get("/user/:id", async (req, res) => {
 // added user
 app.post("/user", async (req, res) => {
   try {
-    const userData = new User(req.body);
+    const {error} = userValidator(req.body)
+    if(error){
+      return res.status(400).json({ error });
+    }
+    const {password} =  req.body;
+    const passwordHash = await bcrypt.hash(password,10)
+    const userData = new User({...req.body,password:passwordHash});
     await userData.save();
     res.status(200).send("User Added successfully");
   } catch (error) {
@@ -65,6 +73,27 @@ app.patch("/user/:id", async (req, res) => {
     res.status(500).send("internal server error")
   }
 });
+
+//delete user
+app.delete("/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400).send("Invalid user id");
+    }
+    const deletedUser = await User.findByIdAndDelete(userId);
+   
+    if (!deletedUser) {
+      res.status(404).send("User not found");
+    }else{
+      res.status(200).send("User Deleted ")
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).send("internal server error")
+  }
+});
+
 
 connectDB()
   .then(() => {
