@@ -1,6 +1,5 @@
 const validator = require("validator");
 const User = require("../models/user-model");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const userValidator = (reqData) => {
@@ -31,4 +30,10 @@ const userAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { userValidator, userAuth };
+const userEditData = async (req) => {
+  const editAllowedFields = ["firstName","lastName","age","contact","skills","photoUrl"]
+  const isEditUserData = Object.keys(req.body).every(field => editAllowedFields.includes(field))
+  return isEditUserData
+}
+
+module.exports = { userValidator, userAuth, userEditData };
