@@ -12,7 +12,7 @@ const connectionRequestSchema = new mongooes.Schema({
         type:String,
         required:true,
         enum:{
-            values:["ignore","interested","accepted","rejected"],
+            values:["ignore","intrested","accepted","rejected"],
             message:`{VALUE} is incorrect status type`
         }
     }   

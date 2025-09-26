@@ -63,4 +63,34 @@ connectionRouter.post(
   }
 );
 
+connectionRouter.post("/request/received/:status/:requestId", userAuth ,async (req,res)=>{
+   try {
+      const loggedIn = req.user;
+      const { status, requestId } = req.params
+
+      // check for valid status request
+      const allowedStatus = ["accepted","rejected"]
+      if(!allowedStatus.includes(status)){
+        return res.status(400).send("Invalid Request")
+      }
+     
+      const connectionRequest = await ConnectionRequestModel.findOne({
+        _id:requestId, // to which document we want to update in connection request
+        status:"intrested", // having status as intrested
+        toUserId:loggedIn._id // to whom request came should be the logged in user
+      })
+
+      if(!connectionRequest){
+        return res.status(400).send("Connection Request not received")
+      }
+      connectionRequest.status = status
+     const data =  await connectionRequest.save()
+      res.status(200).json({mess:`Connection ${status}`,data:data})
+
+   } catch (error) {
+      console.log(error)
+      res.status(500).send("Internal server error",error)
+   }
+})
+
 module.exports = connectionRouter;
