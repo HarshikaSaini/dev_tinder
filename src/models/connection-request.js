@@ -18,5 +18,15 @@ const connectionRequestSchema = new mongooes.Schema({
     }   
 },{timestamps:true})
 
+connectionRequestSchema.index({fromUserId:1,toUserId:1})
+
+connectionRequestSchema.pre("save",function(next){
+    if(this.fromUserId.equals(this.toUserId)){
+       return next(new Error("cannot sent request to yourself"));
+    }
+    next();
+})
+
 const ConnectionRequestModel = new mongooes.model("ConnectionRequestModel",connectionRequestSchema);
+
 module.exports=ConnectionRequestModel

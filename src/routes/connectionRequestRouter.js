@@ -34,10 +34,16 @@ connectionRouter.post(
         ],
       });
       if (existingUser) {
+        let message;
+        if(existingUser.fromUserId.toString() === fromUserId.toString()){
+          message = `Connection request already sent to ${toUser.firstName}`
+        }else{
+          message = `You already have connection request from ${toUser.firstName}`
+        }
         return res
           .status(400)
           .json({
-            mess: `Connection request already sent to ${toUser.firstName}`,
+            mess: message,
           });
       }
 
@@ -52,7 +58,7 @@ connectionRouter.post(
         .json({ mess: "Connection Request sent successfully", data: toUser });
     } catch (error) {
       console.log(error);
-      res.status(500), send("Internal server error", error);
+      res.status(500).send("Internal server error", error);
     }
   }
 );
