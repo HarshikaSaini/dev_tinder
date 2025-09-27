@@ -21,7 +21,7 @@ connectionRouter.post(
       }
 
       // check for the valid status as currently we are dealing with ignore and interest case
-      const allowedStatus = ["ignore", "interested"];
+      const allowedStatus = ["ignore", "intrested"];
       if (!allowedStatus.includes(status)) {
         return res.status(400).json({ mess: "Invalid Request" });
       }
