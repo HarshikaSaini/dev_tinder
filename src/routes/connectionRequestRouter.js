@@ -4,7 +4,7 @@ const { userAuth } = require("../utils/user");
 const ConnectionRequestModel = require("../models/connection-request");
 const User = require("../models/user-model");
 
-
+// to sent the connection request
 connectionRouter.post(
   "/request/:status/:toUserId",
   userAuth,
@@ -63,6 +63,7 @@ connectionRouter.post(
   }
 );
 
+// to accept or reject connection request
 connectionRouter.post("/request/received/:status/:requestId", userAuth ,async (req,res)=>{
    try {
       const loggedIn = req.user;

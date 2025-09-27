@@ -23,28 +23,35 @@ userRouter.get("/user/request/received", userAuth, async (req, res) => {
 });
 
 // get all the accepted connection of the user
-userRouter.get("/user/connection", userAuth, async(req,res) => {
- try {
+userRouter.get("/user/connection", userAuth, async (req, res) => {
+  try {
     const loggedIn = req.user;
     const connections = await ConnectionRequestModel.find({
-        $or:[
-            {toUserId:loggedIn._id,status:"accepted"},
-            {fromUserId:loggedIn._id,status:"accepted"}
-        ]
-    }).populate("fromUserId",["firstName", "lastName", "age", "photoUrl"])
-
-    // we dont want to send the entire info of the request model so we just sent fromuserId data
-    const data = connections.map(item => item.fromUserId)
-
-    res.status(200).json({
-        mess:"Data fetched successfully",
-       data
+      $or: [
+        { toUserId: loggedIn._id, status: "accepted" },
+        { fromUserId: loggedIn._id, status: "accepted" },
+      ],
     })
-    
- } catch (error) {
-     console.log(error)
-     res.status(500).json({mess:"Internal server error" , err:error})
- }
+      .populate("fromUserId", ["firstName", "lastName", "age", "photoUrl"])
+      .populate("toUserId", ["firstName", "lastName", "age", "photoUrl"]);
+
+    // we dont want to send the entire info of the request model so we just sent fromuserId data or to userId data
+    const data = connections.map(item => {
+      if(item.fromUserId._id.toString() === loggedIn._id.toString()){
+        return item.toUserId
+      }else{
+        return item.fromUserId
+      }
+    })
+  
+    res.status(200).json({
+      mess: "Data fetched successfully",
+      data
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ mess: "Internal server error", err: error });
+  }
 });
 
 module.exports = userRouter;
