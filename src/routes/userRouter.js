@@ -2,7 +2,7 @@ const express = require("express");
 const userRouter = express.Router();
 const { userAuth } = require("../utils/user");
 const ConnectionRequestModel = require("../models/connection-request");
-const { populate } = require("dotenv");
+const User = require("../models/user-model");
 
 // to get the list of all pending connection request
 userRouter.get("/user/request/received", userAuth, async (req, res) => {
@@ -11,7 +11,7 @@ userRouter.get("/user/request/received", userAuth, async (req, res) => {
     const connectionRequests = await ConnectionRequestModel.find({
       toUserId: loggedIn._id,
       status: "intrested",
-    }).populate("fromUserId", ["firstName", "lastName", "age", "photoUrl"]);
+    }).populate("fromUserId", ["firstName lastName age photoUrl"]);
 
     res
       .status(200)
@@ -32,8 +32,8 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
         { fromUserId: loggedIn._id, status: "accepted" },
       ],
     })
-      .populate("fromUserId", ["firstName", "lastName", "age", "photoUrl"])
-      .populate("toUserId", ["firstName", "lastName", "age", "photoUrl"]);
+      .populate("fromUserId", ["firstName lastName age photoUrl"])
+      .populate("toUserId", ["firstName lastName age photoUrl"]);
 
     // we dont want to send the entire info of the request model so we just sent fromuserId data or to userId data
     const data = connections.map(item => {
@@ -53,5 +53,39 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
     res.status(500).json({ mess: "Internal server error", err: error });
   }
 });
+
+userRouter.get("/user/feed", userAuth , async (req,res) => {
+  try {
+    const loggedIn = req.user;
+
+    // get all the connection data to which user has done interaction
+    const connectionRequests = await ConnectionRequestModel.find({
+      $or:[{fromUserId:loggedIn._id} , {toUserId:loggedIn._id}]
+    }).select("fromUserId toUserId")
+    
+
+    const hideUsersFromFeed = new Set()
+    connectionRequests.forEach(item => {
+      hideUsersFromFeed.add(item.fromUserId.toString());
+      hideUsersFromFeed.add(item.toUserId.toString())
+    })
+    
+    const users = await User.find({
+      $and:[
+        {_id:{$nin:Array.from(hideUsersFromFeed)}},
+        {_id:{$ne: loggedIn._id}}
+      ]
+    }).select("firstName  lastName age photoUrl")
+  
+    res.status(200).json(
+      {mess:"Feed fetched successfully",
+      data: users
+   })
+
+  } catch (error) {
+     console.log(error)
+     res.status(500).json({mess:"Internal server error" , data:error})
+  }
+})
 
 module.exports = userRouter;

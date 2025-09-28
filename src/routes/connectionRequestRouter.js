@@ -55,7 +55,7 @@ connectionRouter.post(
       await connectionRequest.save();
       res
         .status(200)
-        .json({ mess: "Connection Request sent successfully", data: toUser });
+        .json({ mess: `Connection Request ${status} successfully`, data: toUser });
     } catch (error) {
       console.log(error);
       res.status(500).send("Internal server error", error);
