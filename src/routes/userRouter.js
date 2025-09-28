@@ -83,7 +83,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.status(200).json({ mess: "Feed fetched successfully", data: usersß });
+    res.status(200).json({ mess: "Feed fetched successfully", data: users });
   } catch (error) {
     console.log(error);
     res.status(500).json({ mess: "Internal server error", data: error });
