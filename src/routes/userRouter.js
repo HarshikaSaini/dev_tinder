@@ -36,17 +36,17 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
       .populate("toUserId", ["firstName lastName age photoUrl"]);
 
     // we dont want to send the entire info of the request model so we just sent fromuserId data or to userId data
-    const data = connections.map(item => {
-      if(item.fromUserId._id.toString() === loggedIn._id.toString()){
-        return item.toUserId
-      }else{
-        return item.fromUserId
+    const data = connections.map((item) => {
+      if (item.fromUserId._id.toString() === loggedIn._id.toString()) {
+        return item.toUserId;
+      } else {
+        return item.fromUserId;
       }
-    })
-  
+    });
+
     res.status(200).json({
       mess: "Data fetched successfully",
-      data
+      data,
     });
   } catch (error) {
     console.log(error);
@@ -54,38 +54,40 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
   }
 });
 
-userRouter.get("/user/feed", userAuth , async (req,res) => {
+userRouter.get("/user/feed", userAuth, async (req, res) => {
   try {
     const loggedIn = req.user;
-
+    // pagination for the users
+    const page = req.query.page || 1;
+    let limit = req.query.limit || 10;
+    limit = limit > 50 ? 50 : limit;
+    const skip = (page - 1) * limit;
     // get all the connection data to which user has done interaction
     const connectionRequests = await ConnectionRequestModel.find({
-      $or:[{fromUserId:loggedIn._id} , {toUserId:loggedIn._id}]
-    }).select("fromUserId toUserId")
-    
+      $or: [{ fromUserId: loggedIn._id }, { toUserId: loggedIn._id }],
+    }).select("fromUserId toUserId");
 
-    const hideUsersFromFeed = new Set()
-    connectionRequests.forEach(item => {
+    const hideUsersFromFeed = new Set();
+    connectionRequests.forEach((item) => {
       hideUsersFromFeed.add(item.fromUserId.toString());
-      hideUsersFromFeed.add(item.toUserId.toString())
-    })
-    
-    const users = await User.find({
-      $and:[
-        {_id:{$nin:Array.from(hideUsersFromFeed)}},
-        {_id:{$ne: loggedIn._id}}
-      ]
-    }).select("firstName  lastName age photoUrl")
-  
-    res.status(200).json(
-      {mess:"Feed fetched successfully",
-      data: users
-   })
+      hideUsersFromFeed.add(item.toUserId.toString());
+    });
 
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUsersFromFeed) } },
+        { _id: { $ne: loggedIn._id } },
+      ],
+    })
+      .select("firstName  lastName age photoUrl")
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({ mess: "Feed fetched successfully", data: usersß });
   } catch (error) {
-     console.log(error)
-     res.status(500).json({mess:"Internal server error" , data:error})
+    console.log(error);
+    res.status(500).json({ mess: "Internal server error", data: error });
   }
-})
+});
 
 module.exports = userRouter;
