@@ -17,7 +17,7 @@ const userAuth = async (req, res, next) => {
   const cookie = req.cookies;
   const { token } = cookie;
   if (!token) {
-    throw new Error("Token not found!");
+    return res.status(401).json({ mess: "Please login !" });
   } else {
     const decodeToken = await jwt.verify(token, process.env.JWT_SECRET);
     const { _id } = decodeToken;
@@ -31,9 +31,18 @@ const userAuth = async (req, res, next) => {
 };
 
 const userEditData = async (req) => {
-  const editAllowedFields = ["firstName","lastName","age","contact","skills","photoUrl"]
-  const isEditUserData = Object.keys(req.body).every(field => editAllowedFields.includes(field))
-  return isEditUserData
-}
+  const editAllowedFields = [
+    "firstName",
+    "lastName",
+    "age",
+    "contact",
+    "skills",
+    "photoUrl",
+  ];
+  const isEditUserData = Object.keys(req.body).every((field) =>
+    editAllowedFields.includes(field)
+  );
+  return isEditUserData;
+};
 
 module.exports = { userValidator, userAuth, userEditData };

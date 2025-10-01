@@ -7,12 +7,13 @@ import { addUser } from "../redux/userSlice";
 const Login = () => {
   const [email, setEmail] = useState("harshika@gmail.com");
   const [password, setPassword] = useState("Harshika@123");
-  const dispatch = useDispatch();
+  const [error,setError] = useState("")
+  const dispatch = useDispatch()
   const navigate = useNavigate()
+
   const handleLogin = async () => {
     try {
-      const res = await axios.post(
-        "http://localhost:8080/login",
+      const res = await axios.post(import.meta.env.VITE_BASE_URL + "/login",
         {
           email,
           password,
@@ -21,11 +22,11 @@ const Login = () => {
       );
       dispatch(addUser(res.data)); //dispatches an action
       navigate("/feed")
-    } catch (error) {
-      console.log(error);
+    } catch (error) { 
+      setError(error?.response?.data?.mess || "Something went wrong !" )
     }
   };
-
+  
   return (
     <div className="flex justify-center items-center h-100">
       <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 ">
@@ -56,8 +57,8 @@ const Login = () => {
           className="input outline-none focus:outline-none mb-2"
           placeholder="Enter your password"
         />
-
-        <button onClick={handleLogin} className="btn btn-neutral mt-4">
+        <p className={`min-h-4 pl-1 ${error ? "text-red-500" : "invisible"}`}>{error}</p>
+        <button onClick={handleLogin} className="btn btn-neutral mt-3">
           Login
         </button>
       </fieldset>
