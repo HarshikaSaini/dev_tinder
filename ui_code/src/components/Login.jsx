@@ -1,19 +1,66 @@
-import React from "react";
+import { useState } from "react";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom"
+import { addUser } from "../redux/userSlice";
 
 const Login = () => {
+  const [email, setEmail] = useState("harshika@gmail.com");
+  const [password, setPassword] = useState("Harshika@123");
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/login",
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
+      dispatch(addUser(res.data)); //dispatches an action
+      navigate("/feed")
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center h-100">
-    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-      <legend className="fieldset-legend text-xl">Login Form</legend>
+      <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 ">
+        <legend className="fieldset-legend text-2xl">Login Form</legend>
 
-      <label className="label text-md">Email</label>
-      <input type="email" className="input outline-none focus:outline-none" placeholder="Email" />
+        <label htmlFor="email" className="label text-md">
+          Email
+        </label>
+        <input
+          type="email"
+          id="email"
+          name={email}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="input outline-none focus:outline-none mb-4"
+          placeholder="Enter your email"
+        />
 
-      <label className="label text-md">Password</label>
-      <input type="password" className="input outline-none focus:outline-none" placeholder="Password" />
+        <label htmlFor="password" className="label text-md">
+          Password
+        </label>
+        <input
+          type="password"
+          id="password"
+          name={password}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="input outline-none focus:outline-none mb-2"
+          placeholder="Enter your password"
+        />
 
-      <button className="btn btn-neutral mt-4">Login</button>
-    </fieldset>
+        <button onClick={handleLogin} className="btn btn-neutral mt-4">
+          Login
+        </button>
+      </fieldset>
     </div>
   );
 };
