@@ -11,11 +11,13 @@ userRouter.get("/user/request/received", userAuth, async (req, res) => {
     const connectionRequests = await ConnectionRequestModel.find({
       toUserId: loggedIn._id,
       status: "intrested",
-    }).populate("fromUserId", ["firstName lastName age photoUrl"]);
-
+    }).populate("fromUserId", "firstName lastName age photoUrl gender contact desc");
+   
+    // const data = connectionRequests.map(item => item.fromUserId)
+    
     res
       .status(200)
-      .json({ mess: "Data fetched successfully", data: connectionRequests });
+      .json({ mess: "Data fetched successfully", data:connectionRequests });
   } catch (error) {
     console.log(error);
     res.status(500).send("Internal server error", error);
@@ -32,8 +34,8 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
         { fromUserId: loggedIn._id, status: "accepted" },
       ],
     })
-      .populate("fromUserId", ["firstName lastName age photoUrl"])
-      .populate("toUserId", ["firstName lastName age photoUrl"]);
+      .populate("fromUserId", "firstName lastName age photoUrl gender contact desc")
+      .populate("toUserId", "firstName lastName age photoUrl gender contact desc");
 
     // we dont want to send the entire info of the request model so we just sent fromuserId data or to userId data
     const data = connections.map((item) => {
@@ -43,7 +45,7 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
         return item.fromUserId;
       }
     });
-
+    
     res.status(200).json({
       mess: "Data fetched successfully",
       data,
@@ -79,7 +81,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         { _id: { $ne: loggedIn._id } },
       ],
     })
-      .select("firstName  lastName age photoUrl")
+      .select("firstName lastName age photoUrl gender contact desc")
       .skip(skip)
       .limit(limit);
 

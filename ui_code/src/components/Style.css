@@ -1,0 +1,8 @@
+.input{
+    outline: none;
+    border: none;
+    border-bottom: 2px solid rgb(180, 180, 180);
+}
+.fieldset-legend{
+    font-size: larger;
+}

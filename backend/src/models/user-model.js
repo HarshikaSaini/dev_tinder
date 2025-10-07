@@ -37,6 +37,11 @@ const userSchema = new mongooes.Schema(
         }
       },
     },
+    gender:{
+      type:String,
+      enum: ["male", "female", "others"],
+      default:"male"
+    },
     contact: {
       type: Number,
     },
@@ -53,6 +58,10 @@ const userSchema = new mongooes.Schema(
         }
       },
     },
+    desc:{
+      type:String,
+      default:"No description avaliable"
+    }
   },
   { timestamps: true }
 );

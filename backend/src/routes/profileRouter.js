@@ -15,14 +15,14 @@ profileRouter.get("/profile/view", userAuth, (req, res) => {
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     if (!userEditData(req)) {
-      throw new Error("Invalid edit request");
+      return res.status(401).json("Invalid user request");
     }
     const loggedInUser = req.user;
     Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
     await loggedInUser.save();
     res
       .status(200)
-      .json({ mess: "User updated sucessfull", data: loggedInUser });
+      .json({ mess: "User updated successfully", data: loggedInUser });
   } catch (error) {
     console.log(error);
     res.status(500).send("internal server error");

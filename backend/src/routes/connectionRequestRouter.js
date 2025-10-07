@@ -76,7 +76,7 @@ connectionRouter.post("/request/received/:status/:requestId", userAuth ,async (r
       }
      
       const connectionRequest = await ConnectionRequestModel.findOne({
-        _id:requestId, // to which document we want to update in connection request
+        _id:requestId, 
         status:"intrested", // having status as intrested
         toUserId:loggedIn._id // to whom request came should be the logged in user
       })
